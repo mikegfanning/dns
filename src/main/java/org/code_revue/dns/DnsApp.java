@@ -66,6 +66,53 @@ public class DnsApp {
                 break;
             } else if ("threads".equals(command)) {
                 ThreadUtils.printThreadInfo();
+            } else if ("connectors".equals(command)) {
+                System.out.println("Connectors");
+                System.out.println("----------------------------");
+                System.out.println(connector.getClass().getSimpleName() + "\tPort:\t" + connector.getPort() +
+                        "\tReceive Count:\t" + connector.getReceiveCount() + "\tSend Count:\t" +
+                        connector.getSendCount());
+            } else if ("engine".equals(command)) {
+                System.out.println("Engine Info");
+                System.out.println("----------------------------");
+                System.out.println("Payloads Processed:\t" + engine.getPayloadsProcessed());
+                System.out.println("Processing Errors:\t" + engine.getProcessingErrors());
+            } else if ("resolver chain".equals(command)) {
+                System.out.println("Resolver Chain");
+                System.out.println("----------------------------");
+                int index = 0;
+                for (ResolverRule rule: chain.getResolverRules()) {
+                    if (AddressRegexResolverRule.class == rule.getClass()) {
+                        AddressRegexResolverRule castRule = (AddressRegexResolverRule) rule;
+                        System.out.println(index + ":\t" + rule.getClass().getSimpleName() + "\tRegex:\t" +
+                                castRule.getRegex() + "\t->\t" + rule.getResolver().getClass().getSimpleName());
+                    } else {
+                        System.out.println(index + ":\t" + rule.getClass().getSimpleName() + "\t->\t" +
+                                rule.getResolver().getClass().getSimpleName());
+                    }
+                    index++;
+                }
+            } else if (command.startsWith("add ")) {
+                command = command.replaceFirst("add ", "").trim();
+                if (command.startsWith("exception ")) {
+                    String domain = command.replaceFirst("exception ", "").trim();
+                    resolver.addException(domain);
+                } else {
+                    System.out.println("Command not found.");
+                }
+            } else if (command.startsWith("remove ")) {
+                command = command.replaceFirst("remove ", "").trim();
+                if (command.startsWith("rule ")) {
+                    String indexStr = command.replaceFirst("rule ", "").trim();
+                    try {
+                        int index = Integer.parseInt(indexStr);
+                        chain.remove(index);
+                    } catch (Exception e) {
+                        System.out.println("Invalid rule index.");
+                    }
+                } else {
+                    System.out.println("Command not found.");
+                }
             } else {
                 System.out.println("Command not found.");
             }

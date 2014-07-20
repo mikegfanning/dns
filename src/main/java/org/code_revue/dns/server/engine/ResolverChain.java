@@ -57,4 +57,12 @@ public class ResolverChain {
         return answer;
     }
 
+    /**
+     * Resturns list of resolver rules, in the order they are tested and applied.
+     * @return
+     */
+    public List<ResolverRule> getResolverRules() {
+        return resolverRules;
+    }
+
 }
