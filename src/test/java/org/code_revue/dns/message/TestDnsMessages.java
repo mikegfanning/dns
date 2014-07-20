@@ -1,6 +1,7 @@
 package org.code_revue.dns.message;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.code_revue.dns.server.DnsServer;
 import org.code_revue.dns.server.connector.DatagramConnector;
@@ -91,7 +92,14 @@ public class TestDnsMessages {
         Assert.assertEquals(0, overlay.getAdditionalRecordCount());
     }
 
+    /**
+     * Runs a query against OpenDNS. It's a cute little test, but it introduces a build dependency that you have an
+     * internet connection, which isn't always great when you're at some weird coffee shop with bad wifi.
+     *
+     * @throws IOException
+     */
     @Test
+    @Ignore
     public void queryOpenDnsA() throws IOException {
 
         String domainName = "www.google.com";

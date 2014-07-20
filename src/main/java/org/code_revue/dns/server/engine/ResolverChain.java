@@ -31,7 +31,7 @@ public class ResolverChain {
      * @param index Index of rule in chain.
      * @return
      */
-    public ResolverRule remove(int index) {
+    public ResolverRule removeRule(int index) {
         if (index < 0 || index >= resolverRules.size()) {
             throw new IllegalArgumentException("Index out of bounds.");
         }

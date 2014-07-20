@@ -106,7 +106,7 @@ public class DnsApp {
                     String indexStr = command.replaceFirst("rule ", "").trim();
                     try {
                         int index = Integer.parseInt(indexStr);
-                        chain.remove(index);
+                        chain.removeRule(index);
                     } catch (Exception e) {
                         System.out.println("Invalid rule index.");
                     }
