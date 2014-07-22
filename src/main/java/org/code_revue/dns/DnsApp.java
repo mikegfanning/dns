@@ -18,7 +18,26 @@ import java.util.Scanner;
  */
 public class DnsApp {
 
-    public static void main(String... args) throws LifecycleException, UnknownHostException {
+    public static void main(String... args) throws LifecycleException, UnknownHostException, Exception {
+
+        /*
+        RedirectServlet servlet = new RedirectServlet("http://www.youtube.com/watch?v=_rNsodyWqPY", "lel");
+        final TomcatServer httpServer = new TomcatServer();
+        httpServer.setServlet(servlet);
+        Thread httpThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    httpServer.start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        httpThread.setName("http-" + httpThread.getId());
+        System.out.println("Starting HTTP server...");
+        httpThread.start();
+        */
 
         DatagramConnector connector = new DatagramConnector();
         connector.setPort(53);
@@ -63,6 +82,10 @@ public class DnsApp {
                 System.out.println("Stopping engine...");
                 engine.stop();
 
+                /*
+                System.out.println("Stopping HTTP server...");
+                httpServer.stop();
+                */
                 break;
             } else if ("threads".equals(command)) {
                 ThreadUtils.printThreadInfo();
