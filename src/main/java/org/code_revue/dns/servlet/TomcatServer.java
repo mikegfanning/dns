@@ -6,8 +6,6 @@ import org.apache.catalina.startup.Tomcat;
 
 import javax.servlet.http.HttpServlet;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Mike Fanning

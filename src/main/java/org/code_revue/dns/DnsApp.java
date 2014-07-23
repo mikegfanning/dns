@@ -5,6 +5,8 @@ import org.code_revue.dns.server.connector.DatagramConnector;
 import org.code_revue.dns.server.engine.*;
 import org.code_revue.dns.server.exception.LifecycleException;
 import org.code_revue.dns.server.resolver.LocalhostResolver;
+import org.code_revue.dns.servlet.RedirectServlet;
+import org.code_revue.dns.servlet.TomcatServer;
 import org.code_revue.dns.util.ThreadUtils;
 
 import java.net.UnknownHostException;
@@ -20,8 +22,7 @@ public class DnsApp {
 
     public static void main(String... args) throws LifecycleException, UnknownHostException, Exception {
 
-        /*
-        RedirectServlet servlet = new RedirectServlet("http://www.youtube.com/watch?v=_rNsodyWqPY", "lel");
+        RedirectServlet servlet = new RedirectServlet("http://picard.ytmnd.com/", "lel");
         final TomcatServer httpServer = new TomcatServer();
         httpServer.setServlet(servlet);
         Thread httpThread = new Thread() {
@@ -34,16 +35,16 @@ public class DnsApp {
                 }
             }
         };
+
         httpThread.setName("http-" + httpThread.getId());
         System.out.println("Starting HTTP server...");
         httpThread.start();
-        */
 
         DatagramConnector connector = new DatagramConnector();
         connector.setPort(53);
 
         LocalhostResolver resolver = new LocalhostResolver();
-        resolver.addException("vimeo.com");
+        resolver.addException("ytmnd.com");
 
         ResolverRule rule1 = new AddressRegexResolverRule(".*192\\.168.*", resolver);
         ResolverRule rule2 = new AddressRegexResolverRule(".*127\\.0\\.0\\.1.*", resolver);
@@ -82,10 +83,8 @@ public class DnsApp {
                 System.out.println("Stopping engine...");
                 engine.stop();
 
-                /*
                 System.out.println("Stopping HTTP server...");
                 httpServer.stop();
-                */
                 break;
             } else if ("threads".equals(command)) {
                 ThreadUtils.printThreadInfo();
