@@ -2,6 +2,8 @@ package org.code_revue.dns.server.engine;
 
 import org.code_revue.dns.server.DnsPayload;
 import org.code_revue.dns.server.resolver.DnsResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.regex.Pattern;
 
@@ -12,6 +14,8 @@ import java.util.regex.Pattern;
  * @author Mike Fanning
  */
 public class AddressRegexResolverRule implements ResolverRule {
+
+    private final Logger logger = LoggerFactory.getLogger(AddressRegexResolverRule.class);
 
     private String regex;
     private Pattern pattern;
@@ -35,6 +39,7 @@ public class AddressRegexResolverRule implements ResolverRule {
      */
     @Override
     public boolean isValid(DnsPayload payload) {
+        logger.debug("Checking {} against pattern {}", payload.getRemoteAddress(), regex);
         return pattern.matcher(payload.getRemoteAddress().toString()).matches();
     }
 

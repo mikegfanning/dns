@@ -2,6 +2,8 @@ package org.code_revue.dns.server.engine;
 
 import org.code_revue.dns.message.*;
 import org.code_revue.dns.server.DnsPayload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Moronic implementation of the {@link org.code_revue.dns.server.engine.DnsEngine} interface that always returns the
@@ -12,6 +14,8 @@ import org.code_revue.dns.server.DnsPayload;
 public class SingleTubeEngine implements DnsEngine {
 
     // If the internet is a series of tubes, this engine is a kink.
+
+    private final Logger logger = LoggerFactory.getLogger(SingleTubeEngine.class);
 
     /**
      * Answers every question with the same response.
@@ -33,6 +37,7 @@ public class SingleTubeEngine implements DnsEngine {
                     question.getQuestionClass(), 120, answer));
         }
         payload.setMessageData(builder.build());
+        logger.debug("Returning DNS answer {}", answer);
         return payload;
     }
 

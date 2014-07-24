@@ -3,6 +3,8 @@ package org.code_revue.dns.server.resolver;
 import org.code_revue.dns.message.DnsQuestion;
 import org.code_revue.dns.message.DnsRecord;
 import org.code_revue.dns.message.DnsRecordType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +18,8 @@ import java.util.Map;
  */
 public class SimpleResolver implements DnsResolver {
 
+    private final Logger logger = LoggerFactory.getLogger(SimpleResolver.class);
+
     private Map<DnsRecordType, DnsRecord> records = new HashMap<>();
 
     /**
@@ -25,10 +29,13 @@ public class SimpleResolver implements DnsResolver {
      */
     @Override
     public List<DnsRecord> resolve(DnsQuestion question) {
+        logger.debug("Attempting to resolve {}", question);
         DnsRecord answer = records.get(question.getQuestionType());
         if (null == answer) {
+            logger.debug("Unable to resolve, returning empty list");
             return Collections.emptyList();
         } else {
+            logger.debug("Answer found {}", answer);
             return Collections.singletonList(answer);
         }
     }
@@ -48,6 +55,7 @@ public class SimpleResolver implements DnsResolver {
      * @param record
      */
     public void setDnsRecord(DnsRecordType recordType, DnsRecord record) {
+        logger.debug("Setting record {} for record type {}", record, recordType);
         records.put(recordType, record);
     }
 

@@ -47,16 +47,9 @@ public class DnsApp {
         server.addConnector(connector);
         server.setEngine(engine);
 
-        System.out.println("Starting HTTP server...");
         httpServer.start();
-
-        System.out.println("Starting engine...");
         engine.start();
-
-        System.out.println("Starting connector...");
         connector.start();
-
-        System.out.println("Starting server...");
         server.start();
 
         Scanner scanner = new Scanner(System.in);
@@ -64,16 +57,9 @@ public class DnsApp {
         System.out.print("Enter Command: ");
         while ((command = scanner.nextLine()) != null) {
             if ("exit".equals(command)) {
-                System.out.println("Stopping server...");
                 server.stop();
-
-                System.out.println("Stopping connector...");
                 connector.stop();
-
-                System.out.println("Stopping engine...");
                 engine.stop();
-
-                System.out.println("Stopping HTTP server...");
                 httpServer.stop();
                 break;
             } else if ("threads".equals(command)) {

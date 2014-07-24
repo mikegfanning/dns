@@ -1,5 +1,8 @@
 package org.code_revue.dns.servlet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,6 +14,8 @@ import java.io.IOException;
  * @author Mike Fanning
  */
 public class RedirectServlet extends HttpServlet {
+
+    private final Logger logger = LoggerFactory.getLogger(RedirectServlet.class);
 
     private final String redirectUrl;
     private final String servletName;
@@ -32,6 +37,7 @@ public class RedirectServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
+        logger.debug("Redirecting request {} from {} to {}", req.getRequestURI(), req.getRemoteAddr(), redirectUrl);
         res.sendRedirect(redirectUrl);
     }
 

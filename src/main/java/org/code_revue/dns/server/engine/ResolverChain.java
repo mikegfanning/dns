@@ -2,6 +2,8 @@ package org.code_revue.dns.server.engine;
 
 import org.code_revue.dns.server.DnsPayload;
 import org.code_revue.dns.server.resolver.DnsResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -14,6 +16,8 @@ import java.util.*;
  */
 public class ResolverChain {
 
+    private final Logger logger = LoggerFactory.getLogger(ResolverChain.class);
+
     private List<ResolverRule> resolverRules = new ArrayList<>();
 
     /**
@@ -22,6 +26,7 @@ public class ResolverChain {
      * @return this
      */
     public ResolverChain addRule(ResolverRule rule) {
+        logger.debug("Adding rule {} to chain", rule);
         resolverRules.add(rule);
         return this;
     }
@@ -36,6 +41,7 @@ public class ResolverChain {
             throw new IllegalArgumentException("Index out of bounds.");
         }
 
+        logger.debug("Removing rule at index {}", index);
         return resolverRules.remove(index);
     }
 
@@ -48,8 +54,10 @@ public class ResolverChain {
         DnsResolver answer = null;
 
         for (ResolverRule rule: resolverRules) {
+            logger.trace("Checking rule {} in ResolverChain", rule);
             if (rule.isValid(payload)) {
                 answer = rule.getResolver();
+                logger.debug("DNS Resolver found {}", answer);
                 break;
             }
         }

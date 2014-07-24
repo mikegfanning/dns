@@ -5,6 +5,8 @@ import org.code_revue.dns.message.DnsRecord;
 import org.code_revue.dns.message.DnsRecordClass;
 import org.code_revue.dns.message.DnsRecordType;
 import org.code_revue.dns.util.ByteBufferUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -23,6 +25,8 @@ import java.util.List;
  * @author Mike Fanning
  */
 public class LocalhostResolver implements DnsResolver {
+
+    private final Logger logger = LoggerFactory.getLogger(LocalhostResolver.class);
 
     private List<String> exceptionList = new ArrayList<>();
     private final byte[] serverIp;
@@ -54,11 +58,13 @@ public class LocalhostResolver implements DnsResolver {
     public List<DnsRecord> resolve(DnsQuestion question) {
         assert null != question;
 
+        logger.debug("Attempting to resolve {}", question);
         String questionName = question.getQuestionName().toLowerCase();
 
         // Might want to use a better data structure and algorithm - probably a tree with name segments
         for (String exception: exceptionList) {
             if (questionName.endsWith(exception)) {
+                logger.debug("Exception found {}, returning empty list", exception);
                 return Collections.emptyList();
             }
         }
@@ -91,6 +97,7 @@ public class LocalhostResolver implements DnsResolver {
                 answers.add(new DnsRecord(questionName, DnsRecordType.TXT, DnsRecordClass.IN, ttl, resourceData));
                 break;
         }
+        logger.debug("Resolved answers {}", answers);
         return answers;
 
     }
@@ -100,6 +107,7 @@ public class LocalhostResolver implements DnsResolver {
      * @param exception Domain name
      */
     public void addException(String exception) {
+        logger.debug("Exception added \"{}\"", exception);
         exceptionList.add(exception.toLowerCase());
     }
 
@@ -108,6 +116,7 @@ public class LocalhostResolver implements DnsResolver {
      * @param exception Domain name
      */
     public void removeException(String exception) {
+        logger.debug("Attempting to remove exception \"{}\"", exception);
         exceptionList.remove(exception.toLowerCase());
     }
 

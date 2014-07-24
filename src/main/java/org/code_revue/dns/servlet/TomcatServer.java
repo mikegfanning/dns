@@ -3,6 +3,8 @@ package org.code_revue.dns.servlet;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import java.io.File;
@@ -11,6 +13,8 @@ import java.io.File;
  * @author Mike Fanning
  */
 public class TomcatServer {
+
+    private final Logger logger = LoggerFactory.getLogger(TomcatServer.class);
 
     public static final int DEFAULT_HTTP_PORT = 80;
 
@@ -24,6 +28,9 @@ public class TomcatServer {
      * Start the embedded Tomcat server.
      */
     public void start() throws LifecycleException {
+
+        logger.info("Starting Tomcat Server");
+
         if (running) {
             throw new IllegalStateException("Server is already running.");
         }
@@ -31,8 +38,11 @@ public class TomcatServer {
         server = new Tomcat();
         server.setPort(port);
 
+        logger.debug("Adding context");
         File base = new File(System.getProperty("java.io.tmpdir"));
         Context context = server.addContext("/", base.getAbsolutePath());
+
+        logger.debug("Adding servlet {}", servlet.getServletName());
         Tomcat.addServlet(context, servlet.getServletName(), servlet);
         context.addServletMapping("/", servlet.getServletName());
 
@@ -45,12 +55,15 @@ public class TomcatServer {
      * @throws LifecycleException
      */
     public void stop() throws LifecycleException {
-        if (!running) {
-            throw new IllegalStateException("Server is not running.");
-        }
 
-        running = false;
-        server.stop();
+        logger.info("Stopping Tomcat Server");
+
+        if (!running) {
+            logger.warn("Tomcat Server is already stopped");
+        } else {
+            running = false;
+            server.stop();
+        }
     }
 
     public HttpServlet getServlet() {

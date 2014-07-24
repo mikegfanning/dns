@@ -6,6 +6,8 @@ import org.code_revue.dns.server.connector.DnsConnector;
 import org.code_revue.dns.server.engine.DnsEngine;
 import org.code_revue.dns.server.exception.ConnectorException;
 import org.code_revue.dns.server.exception.LifecycleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.channels.AsynchronousCloseException;
 import java.util.concurrent.*;
@@ -31,6 +33,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class DnsServer {
 
+    private final Logger logger = LoggerFactory.getLogger(DnsServer.class);
+
     private volatile boolean running = false;
 
     private ConcurrentMap<DnsConnector, ConnectorWorker> connectorWorkers = new ConcurrentHashMap<>();
@@ -45,18 +49,24 @@ public class DnsServer {
      * @throws LifecycleException If the server is already running
      */
     public void start() throws LifecycleException {
+
+        logger.info("Starting DNS Server");
+
         if (running) {
             throw new LifecycleException("Server is already running");
         }
 
         if (null == executor) {
+            logger.debug("No ExecutorService found, creating ThreadPoolExecutor");
             ThreadPoolExecutor tpExec = new ThreadPoolExecutor(5, 10, 60, TimeUnit.SECONDS,
                     new ArrayBlockingQueue<Runnable>(40));
+            logger.debug("Prestarting all cores in ThreadPoolExecutor");
             tpExec.prestartAllCoreThreads();
             executor = tpExec;
         }
 
         for (ConnectorWorker worker : connectorWorkers.values()) {
+            logger.debug("Starting connector thread {}", worker.getName());
             worker.start();
         }
 
@@ -77,6 +87,9 @@ public class DnsServer {
      * @param connector
      */
     public void addConnector(DnsConnector connector) {
+
+        logger.debug("Adding connector to server");
+
         long index = connectorIndex.incrementAndGet();
         ConnectorWorker worker = new ConnectorWorker(connector, "connector-" + index);
         ConnectorWorker oldWorker = connectorWorkers.putIfAbsent(connector, worker);
@@ -86,6 +99,7 @@ public class DnsServer {
         }
 
         if (!worker.isAlive() && !worker.isShutdown() && running) {
+            logger.debug("Server is already running, starting connector thread");
             worker.start();
         }
     }
@@ -96,9 +110,11 @@ public class DnsServer {
      * @param connector
      */
     public void removeConnector(DnsConnector connector) {
+        logger.debug("Attempting to remove connector");
         ConnectorWorker worker = connectorWorkers.remove(connector);
 
         if (null != worker && !worker.isShutdown()) {
+            logger.debug("Stopping connector thread {}", worker.getName());
             worker.shutdown();
         }
     }
@@ -109,17 +125,23 @@ public class DnsServer {
      * @throws LifecycleException If the server is not running
      */
     public void stop() throws LifecycleException {
+
+        logger.info("Stopping DNS Server");
+
         if (!running) {
-            throw new LifecycleException("Server is not running");
+            logger.warn("DNS Server is already stopped");
+        } else {
+
+            running = false;
+
+            for (ConnectorWorker worker : connectorWorkers.values()) {
+                logger.debug("Stopping connector thread {}", worker.getName());
+                worker.shutdown();
+            }
+
+            logger.debug("Stopping ExecutorService");
+            executor.shutdown();
         }
-
-        running = false;
-
-        for (ConnectorWorker worker: connectorWorkers.values()) {
-            worker.shutdown();
-        }
-
-        executor.shutdown();
     }
 
     private class ConnectorWorker extends Thread {
@@ -142,29 +164,35 @@ public class DnsServer {
                         final DnsPayload payload = connector.read();
 
                         try {
-                            executor.submit(new Runnable() {
-                                @Override
-                                public void run() {
-                                    DnsPayload response = engine.processDnsPayload(payload);
-                                    try {
-                                        connector.write(response);
-                                    } catch (ConnectorException e) {
-                                        e.printStackTrace();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                            if (null != payload) {
+
+                                logger.debug("DNS query received from {}", payload.getRemoteAddress());
+
+                                executor.submit(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        DnsPayload response = engine.processDnsPayload(payload);
+                                        try {
+                                            logger.debug("Sending response to {}", payload.getRemoteAddress());
+                                            connector.write(response);
+                                        } catch (ConnectorException e) {
+                                            logger.error("Connector write error", e);
+                                        } catch (Exception e) {
+                                            logger.error("Connector error", e);
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                         } catch (RejectedExecutionException e) {
+                            logger.error("ExecutorService cannot accept any more tasks", e);
                             connector.write(returnServerFailure(payload));
-                            e.printStackTrace();
                         } catch (Exception e) {
+                            logger.error("Error resolving response", e);
                             connector.write(returnServerFailure(payload));
-                            e.printStackTrace();
                         }
                     } catch (ConnectorException e) {
                         if (AsynchronousCloseException.class != e.getCause().getClass()) {
-                            e.printStackTrace();
+                            logger.error("Error reading from connector", e);
                         }
                     }
                 } else {

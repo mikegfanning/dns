@@ -4,6 +4,8 @@ import org.code_revue.dns.message.*;
 import org.code_revue.dns.server.DnsPayload;
 import org.code_revue.dns.server.exception.LifecycleException;
 import org.code_revue.dns.server.resolver.DnsResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -30,8 +32,13 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class StandardEngine implements DnsEngine {
 
+    private final Logger logger = LoggerFactory.getLogger(StandardEngine.class);
+
+    public static final int DEFAULT_DNS_PORT = 53;
+
     private boolean running;
     private byte[] dnsServerIp;
+    private int port;
     private DatagramChannel channel;
 
     private ResolverChain resolverChain;
@@ -45,7 +52,18 @@ public class StandardEngine implements DnsEngine {
      * @param dnsServerIp Server address
      */
     public StandardEngine(byte[] dnsServerIp) {
+        this(dnsServerIp, DEFAULT_DNS_PORT);
+    }
+
+    /**
+     * Creates a new engine with the provided server IP and port for relaying queries that cannot be authoritatively
+     * answered.
+     * @param dnsServerIp Server address
+     * @param port Server port
+     */
+    public StandardEngine(byte[] dnsServerIp, int port) {
         this.dnsServerIp = dnsServerIp;
+        this.port = port;
     }
 
     /**
@@ -54,17 +72,25 @@ public class StandardEngine implements DnsEngine {
      * established
      */
     public void start() throws LifecycleException {
+
+        logger.info("Starting Standard Engine");
+
         if (running) {
             throw new LifecycleException("Engine is already running");
         }
 
         try {
+            logger.debug("Opening DatagramChannel");
             channel = DatagramChannel.open();
-            channel.connect(new InetSocketAddress(Inet4Address.getByAddress(dnsServerIp), 53));
+
+            logger.debug("Connecting to relay DNS server {} port {}", dnsServerIp, port);
+            channel.connect(new InetSocketAddress(Inet4Address.getByAddress(dnsServerIp), port));
             running = true;
         } catch (UnknownHostException e) {
+            logger.error("Could not connect to relay DNS server", e);
             throw new LifecycleException("Could not connect to server IP address", e);
         } catch (IOException e) {
+            logger.error("Could not open and connect to relay DNS server", e);
             throw new LifecycleException("Could not open DatagramChannel", e);
         }
     }
@@ -85,6 +111,7 @@ public class StandardEngine implements DnsEngine {
         // Resolver Chain
         DnsResolver resolver = null;
         if (null != resolverChain) {
+            logger.debug("Getting DnsResolver from ResolverChain");
             resolver = resolverChain.getResolver(payload);
         }
 
@@ -96,8 +123,11 @@ public class StandardEngine implements DnsEngine {
             DnsQuestion[] questions = overlay.getQuestions();
             authoritative = true;
             for (DnsQuestion question : questions) {
+                logger.debug("Resolving question {}", question);
                 List<DnsRecord> answer = resolver.resolve(question);
+
                 if (null == answer || 0 == answer.size()) {
+                    logger.debug("Server is not authoritative");
                     authoritative = false;
                     break;
                 }
@@ -107,6 +137,7 @@ public class StandardEngine implements DnsEngine {
 
         if (authoritative) {
 
+            logger.debug("Building NO_ERROR authoritative response");
             DnsResponseBuilder builder = new DnsResponseBuilder(payload.getMessageData());
             builder.setAuthoritativeAnswer(true)
                     .setRecursionAvailable(true)
@@ -120,13 +151,19 @@ public class StandardEngine implements DnsEngine {
 
             // Recursive Query
             try {
+                logger.debug("Sending DNS query to relay server");
                 channel.write(payload.getMessageData());
+
                 ByteBuffer response = ByteBuffer.allocateDirect(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
                 channel.receive(response);
+                logger.debug("Response received from relay server");
+
+
                 response.limit(response.position());
                 response.position(0);
                 payload.setMessageData(response.slice());
             } catch (IOException e) {
+                logger.error("Error communicating with relay server, returning SERVER_FAILURE", e);
                 DnsResponseBuilder builder = new DnsResponseBuilder(payload.getMessageData());
                 builder.setResponseCode(DnsResponseCode.SERVER_FAILURE);
                 payload.setMessageData(builder.build());
@@ -146,15 +183,19 @@ public class StandardEngine implements DnsEngine {
      * server
      */
     public void stop() throws LifecycleException {
-        if (!running) {
-            throw new LifecycleException("Engine is not running");
-        }
 
-        running = false;
-        try {
-            channel.close();
-        } catch (IOException e) {
-            throw new LifecycleException("Error closing DatagramChannel", e);
+        logger.info("Stopping Standard Engine");
+
+        if (!running) {
+            logger.warn("Standard Engine already stopped");
+        } else {
+            running = false;
+            try {
+                channel.close();
+            } catch (IOException e) {
+                logger.error("Error closing DatagramChannel", e);
+                throw new LifecycleException("Error closing DatagramChannel", e);
+            }
         }
     }
 
