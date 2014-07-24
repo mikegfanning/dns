@@ -14,7 +14,8 @@ import java.util.Scanner;
 
 /**
  * Simple application that wires together the necessary components for a {@link org.code_revue.dns.server.DnsServer} and
- * starts them. The main thread reads commands from standard in and can be used to manage the server (well, sort of).
+ * starts them. Also starts an embedded Tomcat server which redirects all HTTP reqeusts to a pre-defined URL. The main
+ * thread reads commands from standard in and can be used to manage the server (well, sort of).
  *
  * @author Mike Fanning
  */
@@ -25,20 +26,6 @@ public class DnsApp {
         RedirectServlet servlet = new RedirectServlet("http://picard.ytmnd.com/", "lel");
         final TomcatServer httpServer = new TomcatServer();
         httpServer.setServlet(servlet);
-        Thread httpThread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    httpServer.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        httpThread.setName("http-" + httpThread.getId());
-        System.out.println("Starting HTTP server...");
-        httpThread.start();
 
         DatagramConnector connector = new DatagramConnector();
         connector.setPort(53);
@@ -59,6 +46,9 @@ public class DnsApp {
         DnsServer server = new DnsServer();
         server.addConnector(connector);
         server.setEngine(engine);
+
+        System.out.println("Starting HTTP server...");
+        httpServer.start();
 
         System.out.println("Starting engine...");
         engine.start();

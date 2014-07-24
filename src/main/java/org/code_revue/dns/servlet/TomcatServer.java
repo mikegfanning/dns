@@ -38,7 +38,6 @@ public class TomcatServer {
 
         server.start();
         running = true;
-        server.getServer().await();
     }
 
     /**
