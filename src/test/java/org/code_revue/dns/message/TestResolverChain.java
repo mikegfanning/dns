@@ -75,7 +75,6 @@ public class TestResolverChain {
      * @throws BrokenBarrierException
      */
     @Test
-    @Ignore
     public void concurrentModification() throws InterruptedException, TimeoutException, BrokenBarrierException {
 
         // Put a bunch of false junk at the beginning of the resolver chain so that we have to iterate over some stuff.

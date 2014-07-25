@@ -6,11 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Chain of {@link org.code_revue.dns.server.engine.ResolverRule}s which is used to map incoming DNS queries to the
  * appropriate {@link org.code_revue.dns.server.resolver.DnsResolver}. The rules are check in order and the first
  * matching question resolver is returned.
+ *
+ * This class is thread safe.
  *
  * @author Mike Fanning
  */
@@ -18,7 +21,7 @@ public class ResolverChain {
 
     private final Logger logger = LoggerFactory.getLogger(ResolverChain.class);
 
-    private List<ResolverRule> resolverRules = new ArrayList<>();
+    private List<ResolverRule> resolverRules = new CopyOnWriteArrayList<>();
 
     /**
      * Add a new {@link org.code_revue.dns.server.engine.ResolverRule} to this chain.
