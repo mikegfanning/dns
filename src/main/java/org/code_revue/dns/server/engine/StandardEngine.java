@@ -2,7 +2,6 @@ package org.code_revue.dns.server.engine;
 
 import org.code_revue.dns.message.*;
 import org.code_revue.dns.server.DnsPayload;
-import org.code_revue.dns.server.exception.LifecycleException;
 import org.code_revue.dns.server.resolver.DnsResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,31 +67,24 @@ public class StandardEngine implements DnsEngine {
 
     /**
      * Starts the engine. This will open a datagram connection to the relay DNS server.
-     * @throws LifecycleException If the server is already running or a connection to the relay server cannot be
-     * established
+     * @throws java.lang.IllegalStateException If the server is already running
+     * @throws java.io.IOException If there is a problem communicating with the relay server
+     * @throws java.net.UnknownHostException If the relay server cannot be found
      */
-    public void start() throws LifecycleException {
+    public void start() throws IOException, UnknownHostException {
 
         logger.info("Starting Standard Engine");
 
         if (running) {
-            throw new LifecycleException("Engine is already running");
+            throw new IllegalStateException("Engine is already running");
         }
 
-        try {
-            logger.debug("Opening DatagramChannel");
-            channel = DatagramChannel.open();
+        logger.debug("Opening DatagramChannel");
+        channel = DatagramChannel.open();
 
-            logger.debug("Connecting to relay DNS server {} port {}", dnsServerIp, port);
-            channel.connect(new InetSocketAddress(Inet4Address.getByAddress(dnsServerIp), port));
-            running = true;
-        } catch (UnknownHostException e) {
-            logger.error("Could not connect to relay DNS server", e);
-            throw new LifecycleException("Could not connect to server IP address", e);
-        } catch (IOException e) {
-            logger.error("Could not open and connect to relay DNS server", e);
-            throw new LifecycleException("Could not open DatagramChannel", e);
-        }
+        logger.debug("Connecting to relay DNS server {} port {}", dnsServerIp, port);
+        channel.connect(new InetSocketAddress(Inet4Address.getByAddress(dnsServerIp), port));
+        running = true;
     }
 
     /**
@@ -100,8 +92,13 @@ public class StandardEngine implements DnsEngine {
      * relaying to another DNS server.
      * @param payload Query
      * @return Response
+     * @throws java.lang.IllegalStateException If the server is not running
      */
     public DnsPayload processDnsPayload(DnsPayload payload) {
+
+        if (!running) {
+            throw new IllegalStateException("The engine is not running");
+        }
 
         DnsMessageOverlay overlay = new DnsMessageOverlay(payload.getMessageData());
 
@@ -179,10 +176,10 @@ public class StandardEngine implements DnsEngine {
 
     /**
      * Stops the server and closes connection to relay DNS server.
-     * @throws LifecycleException If the server is not running or there is a problem closing the connection to the relay
-     * server
+     * @throws java.io.IOException If the server is not running or there is a problem closing the connection to the
+     * relay server
      */
-    public void stop() throws LifecycleException {
+    public void stop() throws IOException {
 
         logger.info("Stopping Standard Engine");
 
@@ -190,12 +187,7 @@ public class StandardEngine implements DnsEngine {
             logger.warn("Standard Engine already stopped");
         } else {
             running = false;
-            try {
-                channel.close();
-            } catch (IOException e) {
-                logger.error("Error closing DatagramChannel", e);
-                throw new LifecycleException("Error closing DatagramChannel", e);
-            }
+            channel.close();
         }
     }
 

@@ -2,8 +2,6 @@ package org.code_revue.dns.server.connector;
 
 import org.code_revue.dns.message.DnsMessageOverlay;
 import org.code_revue.dns.server.DnsPayload;
-import org.code_revue.dns.server.exception.ConnectorException;
-import org.code_revue.dns.server.exception.LifecycleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,30 +39,26 @@ public class DatagramConnector implements DnsConnector {
 
     /**
      * Opens a datagram channel and binds it to the supplied host and port.
-     * @throws LifecycleException
+     * @throws java.lang.IllegalStateException If the connector is already running
+     * @throws java.io.IOException If there is an error starting or binding the channel
      */
-    public void start() throws LifecycleException {
+    public void start() throws IOException {
 
         logger.info("Starting Datagram Connector");
 
         if (running) {
-            throw new LifecycleException("Connector is already running");
+            throw new IllegalStateException("Connector is already running");
         }
 
-        try {
-            channel = DatagramChannel.open();
-            if (null == hostname) {
-                logger.debug("Binding DatagramChannel to port {}", port);
-                channel.bind(new InetSocketAddress(port));
-            } else {
-                logger.debug("Binding DatagramChannel to hostname {} port {}", hostname, port);
-                channel.bind(new InetSocketAddress(hostname, port));
-            }
-            running = true;
-        } catch (IOException e) {
-            logger.error("Could not open and bind DatagramChannel", e);
-            new LifecycleException("Could not open and bind DatagramChannel", e);
+        channel = DatagramChannel.open();
+        if (null == hostname) {
+            logger.debug("Binding DatagramChannel to port {}", port);
+            channel.bind(new InetSocketAddress(port));
+        } else {
+            logger.debug("Binding DatagramChannel to hostname {} port {}", hostname, port);
+            channel.bind(new InetSocketAddress(hostname, port));
         }
+        running = true;
     }
 
     @Override
@@ -80,12 +74,13 @@ public class DatagramConnector implements DnsConnector {
      * Reads from the datagram channel and returns a {@link org.code_revue.dns.server.DnsPayload}, which contains the
      * client's socket address and the binary data from the DNS query.
      * @return Query data if read from channel, otherwise null
-     * @throws ConnectorException If the {@link #start()} method has not been called or there is a communication error
+     * @throws java.lang.IllegalStateException If the connector is already running
+     * @throws java.io.IOException If the {@link #start()} method has not been called or there is a communication error
      */
     @Override
-    public DnsPayload read() throws ConnectorException {
+    public DnsPayload read() throws IOException {
         if (!running) {
-            throw new ConnectorException(new LifecycleException("Connector is not running"));
+            throw new IllegalStateException("Connector is not running");
         }
 
         try {
@@ -100,9 +95,6 @@ public class DatagramConnector implements DnsConnector {
 
         } catch (AsynchronousCloseException e) {
             logger.debug("Caught AsynchronousCloseException - this could be the server shutting down");
-        } catch (IOException e) {
-            logger.error("Error reading from DatagramChannel", e);
-            throw new ConnectorException("Error while reading from DatagramChannel", e);
         }
 
         return null;
@@ -112,30 +104,26 @@ public class DatagramConnector implements DnsConnector {
      * Send a DNS response back to the client.
      * @param payload Response address and data
      * @return Number of bytes sent
-     * @throws ConnectorException If the connector has not been started or there is a communication error
+     * @throws java.lang.IllegalStateException If the connector is not running
+     * @throws java.io.IOException If the connector has not been started or there is a communication error
      */
     @Override
-    public int write(DnsPayload payload) throws ConnectorException {
+    public int write(DnsPayload payload) throws IOException {
         if (!running) {
-            throw new ConnectorException(new LifecycleException("Connector is not running"));
+            throw new IllegalStateException("Connector is not running");
         }
 
-        try {
-            int result = channel.send(payload.getMessageData(), payload.getRemoteAddress());
-            logger.debug("Sent {} bytes to {}", result, payload.getRemoteAddress());
-            sendCount.incrementAndGet();
-            return result;
-        } catch (IOException e) {
-            logger.error("Error writing to DatagramChannel", e);
-            throw new ConnectorException("Error while writing to DatagramChannel", e);
-        }
+        int result = channel.send(payload.getMessageData(), payload.getRemoteAddress());
+        logger.debug("Sent {} bytes to {}", result, payload.getRemoteAddress());
+        sendCount.incrementAndGet();
+        return result;
     }
 
     /**
      * Stops this connector and closes the underlying channel.
-     * @throws LifecycleException If the connector is not running or there is a problem closing the channel
+     * @throws java.io.IOException If the connector is not running or there is a problem closing the channel
      */
-    public void stop() throws LifecycleException {
+    public void stop() throws IOException {
 
         logger.info("Stopping Datagram Connector");
 
@@ -143,12 +131,7 @@ public class DatagramConnector implements DnsConnector {
             logger.warn("Connector is not running");
         } else {
             running = false;
-            try {
-                channel.close();
-            } catch (IOException e) {
-                logger.error("Error closing DatagramChannel", e);
-                throw new LifecycleException("Could not close DatagramChannel", e);
-            }
+            channel.close();
         }
     }
 

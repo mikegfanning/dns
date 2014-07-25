@@ -1,7 +1,8 @@
 package org.code_revue.dns.server.connector;
 
 import org.code_revue.dns.server.DnsPayload;
-import org.code_revue.dns.server.exception.ConnectorException;
+
+import java.io.IOException;
 
 /**
  * This interface represents an abstract endpoint for communicating binary DNS messages.
@@ -19,15 +20,15 @@ public interface DnsConnector {
     /**
      * Reads a DNS message from the connector.
      * @return Payload containing sender address and binary message data
-     * @throws ConnectorException
+     * @throws java.io.IOException
      */
-    DnsPayload read() throws ConnectorException;
+    DnsPayload read() throws IOException;
 
     /**
      * Send a DNS message through the connector.
      * @param payload Address of recipient and binary response data
      * @return Number of bytes sent
-     * @throws ConnectorException
+     * @throws java.io.IOException
      */
-    int write(DnsPayload payload) throws ConnectorException;
+    int write(DnsPayload payload) throws IOException;
 }
