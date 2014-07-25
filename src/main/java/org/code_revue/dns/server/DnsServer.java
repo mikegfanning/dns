@@ -4,11 +4,10 @@ import org.code_revue.dns.message.DnsResponseBuilder;
 import org.code_revue.dns.message.DnsResponseCode;
 import org.code_revue.dns.server.connector.DnsConnector;
 import org.code_revue.dns.server.engine.DnsEngine;
-import org.code_revue.dns.server.exception.ConnectorException;
-import org.code_revue.dns.server.exception.LifecycleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.channels.AsynchronousCloseException;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -46,14 +45,14 @@ public class DnsServer {
      * Starts the server. After this method is invoked, all connectors begin reading messages and passing them to the
      * engine for processing. If an {@link java.util.concurrent.ExecutorService} has not been set, a
      * {@link java.util.concurrent.ThreadPoolExecutor} will be created by default.
-     * @throws LifecycleException If the server is already running
+     * @throws java.lang.IllegalStateException If the server is already running
      */
-    public void start() throws LifecycleException {
+    public void start() {
 
         logger.info("Starting DNS Server");
 
         if (running) {
-            throw new LifecycleException("Server is already running");
+            throw new IllegalStateException("Server is already running");
         }
 
         if (null == executor) {
@@ -122,9 +121,8 @@ public class DnsServer {
     /**
      * Stops the server and interrupts all connector threads. Also shuts down the underlying
      * {@link java.util.concurrent.ExecutorService}.
-     * @throws LifecycleException If the server is not running
      */
-    public void stop() throws LifecycleException {
+    public void stop() {
 
         logger.info("Stopping DNS Server");
 
@@ -175,7 +173,7 @@ public class DnsServer {
                                         try {
                                             logger.debug("Sending response to {}", payload.getRemoteAddress());
                                             connector.write(response);
-                                        } catch (ConnectorException e) {
+                                        } catch (IOException e) {
                                             logger.error("Connector write error", e);
                                         } catch (Exception e) {
                                             logger.error("Connector error", e);
@@ -190,10 +188,8 @@ public class DnsServer {
                             logger.error("Error resolving response", e);
                             connector.write(returnServerFailure(payload));
                         }
-                    } catch (ConnectorException e) {
-                        if (AsynchronousCloseException.class != e.getCause().getClass()) {
-                            logger.error("Error reading from connector", e);
-                        }
+                    } catch (IOException e) {
+                        logger.error("Error reading from connector", e);
                     }
                 } else {
                     // uhhhh shit

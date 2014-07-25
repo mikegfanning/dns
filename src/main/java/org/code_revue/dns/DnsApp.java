@@ -1,14 +1,15 @@
 package org.code_revue.dns;
 
+import org.apache.catalina.LifecycleException;
 import org.code_revue.dns.server.DnsServer;
 import org.code_revue.dns.server.connector.DatagramConnector;
 import org.code_revue.dns.server.engine.*;
-import org.code_revue.dns.server.exception.LifecycleException;
 import org.code_revue.dns.server.resolver.LocalhostResolver;
 import org.code_revue.dns.servlet.RedirectServlet;
 import org.code_revue.dns.servlet.TomcatServer;
 import org.code_revue.dns.util.ThreadUtils;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
@@ -21,7 +22,7 @@ import java.util.Scanner;
  */
 public class DnsApp {
 
-    public static void main(String... args) throws LifecycleException, UnknownHostException, Exception {
+    public static void main(String... args) throws IOException, LifecycleException {
 
         RedirectServlet servlet = new RedirectServlet("http://picard.ytmnd.com/", "lel");
         final TomcatServer httpServer = new TomcatServer();

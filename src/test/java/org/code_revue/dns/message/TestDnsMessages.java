@@ -7,7 +7,6 @@ import org.code_revue.dns.server.DnsServer;
 import org.code_revue.dns.server.connector.DatagramConnector;
 import org.code_revue.dns.server.engine.DnsEngine;
 import org.code_revue.dns.server.engine.SingleTubeEngine;
-import org.code_revue.dns.server.exception.LifecycleException;
 
 import java.io.IOException;
 import java.net.*;
@@ -134,7 +133,7 @@ public class TestDnsMessages {
     }
 
     @Test
-    public void testDnsServerConcurrency() throws LifecycleException, InterruptedException, BrokenBarrierException {
+    public void testDnsServerConcurrency() throws InterruptedException, BrokenBarrierException, IOException {
 
         final int port = 8053;
 
