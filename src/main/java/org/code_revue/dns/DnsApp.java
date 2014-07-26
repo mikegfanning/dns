@@ -10,7 +10,6 @@ import org.code_revue.dns.servlet.TomcatServer;
 import org.code_revue.dns.util.ThreadUtils;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Scanner;
 
 /**

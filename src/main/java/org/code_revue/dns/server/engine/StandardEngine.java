@@ -35,11 +35,12 @@ public class StandardEngine implements DnsEngine {
 
     public static final int DEFAULT_DNS_PORT = 53;
 
-    private boolean running;
-    private byte[] dnsServerIp;
-    private int port;
-    private DatagramChannel channel;
+    private volatile boolean running;
 
+    private final byte[] dnsServerIp;
+    private final int port;
+
+    private DatagramChannel channel;
     private ResolverChain resolverChain;
 
     private AtomicLong payloadsProcessed = new AtomicLong(0);
