@@ -15,6 +15,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * {@link org.code_revue.dns.server.DnsPayload} to determine validity. For example, if "cnn.com" is added to the white
  * list, "www.cnn.com", "a.b.cnn.com" and "cnn.com" are valid.
  *
+ * Adding, removing and resolving are all thread safe operations. This class makes no guarantees about the thread safety
+ * of the {@link org.code_revue.dns.server.resolver.DnsResolver}.
+ *
  * @author Mike Fanning
  */
 public class QuestionNameResolverRule implements ResolverRule {
