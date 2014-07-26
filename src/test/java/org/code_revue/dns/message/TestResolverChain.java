@@ -94,7 +94,7 @@ public class TestResolverChain {
             public void run() {
                 try {
                     barrier.await(5, TimeUnit.SECONDS);
-                    for (long num = 0; num < numIterations; num++) {
+                    for (int num = 0; num < numIterations; num++) {
                         if (num % numThreads >= (numThreads / 2)) {
                             resolverChain.addRule(new DumbRule(Long.toString(num), rand.nextFloat() > 0.9f));
                         } else {
