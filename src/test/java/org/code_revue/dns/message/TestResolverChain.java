@@ -90,21 +90,16 @@ public class TestResolverChain {
         final CyclicBarrier barrier = new CyclicBarrier(numThreads + 1);
 
         Runnable worker = new Runnable() {
-
-            AtomicLong counter = new AtomicLong(0);
-
             @Override
             public void run() {
                 try {
-                    long num = counter.getAndIncrement();
                     barrier.await(5, TimeUnit.SECONDS);
-                    while (num < numIterations) {
+                    for (long num = 0; num < numIterations; num++) {
                         if (num % numThreads >= (numThreads / 2)) {
                             resolverChain.addRule(new DumbRule(Long.toString(num), rand.nextFloat() > 0.9f));
                         } else {
                             resolverChain.removeRule(0);
                         }
-                        num = counter.getAndIncrement();
                     }
                     barrier.await(10, TimeUnit.SECONDS);
                 } catch (Exception e) {
