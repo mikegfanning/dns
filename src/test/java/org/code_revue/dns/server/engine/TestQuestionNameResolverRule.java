@@ -1,5 +1,9 @@
-package org.code_revue.dns.message;
+package org.code_revue.dns.server.engine;
 
+import org.code_revue.dns.message.DnsQueryBuilder;
+import org.code_revue.dns.message.DnsQuestion;
+import org.code_revue.dns.message.DnsRecordClass;
+import org.code_revue.dns.message.DnsRecordType;
 import org.code_revue.dns.server.DnsPayload;
 import org.code_revue.dns.server.engine.QuestionNameResolverRule;
 import org.code_revue.dns.server.resolver.SimpleResolver;

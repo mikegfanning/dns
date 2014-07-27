@@ -1,4 +1,4 @@
-package org.code_revue.dns.message;
+package org.code_revue.dns.server.engine;
 
 import org.code_revue.dns.server.DnsPayload;
 import org.code_revue.dns.server.engine.AddressRegexResolverRule;
