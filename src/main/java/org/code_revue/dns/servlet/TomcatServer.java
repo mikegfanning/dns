@@ -37,10 +37,11 @@ public class TomcatServer {
 
         server = new Tomcat();
         server.setPort(port);
+        String workDir = (new File(System.getProperty("java.io.tmpdir"))).getAbsolutePath();
+        server.setBaseDir(workDir);
 
         logger.debug("Adding context");
-        File base = new File(System.getProperty("java.io.tmpdir"));
-        Context context = server.addContext("/", base.getAbsolutePath());
+        Context context = server.addContext("/", workDir + File.separator + "webapp");
 
         logger.debug("Adding servlet {}", servlet.getServletName());
         Tomcat.addServlet(context, servlet.getServletName(), servlet);
