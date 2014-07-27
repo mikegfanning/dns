@@ -2,6 +2,7 @@ package org.code_revue.dns.server;
 
 import org.code_revue.dns.message.DnsResponseBuilder;
 import org.code_revue.dns.message.DnsResponseCode;
+import org.code_revue.dns.server.connector.DatagramConnector;
 import org.code_revue.dns.server.connector.DnsConnector;
 import org.code_revue.dns.server.engine.DnsEngine;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousCloseException;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 

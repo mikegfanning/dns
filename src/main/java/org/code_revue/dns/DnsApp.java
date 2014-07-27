@@ -23,7 +23,7 @@ public class DnsApp {
 
     public static void main(String... args) throws IOException, LifecycleException {
 
-        RedirectServlet servlet = new RedirectServlet("http://picard.ytmnd.com/", "lel");
+        RedirectServlet servlet = new RedirectServlet("http://hippohippo.ytmnd.com/", "lel");
         final TomcatServer httpServer = new TomcatServer();
         httpServer.setServlet(servlet);
 
@@ -108,6 +108,21 @@ public class DnsApp {
                     } catch (Exception e) {
                         System.out.println("Invalid rule index.");
                     }
+                } else {
+                    System.out.println("Command not found.");
+                }
+            } else if (command.startsWith("get ")) {
+                command = command.replaceFirst("get ", "").trim();
+                if (command.startsWith("redirect")) {
+                    System.out.println("Redirect URL: " + servlet.getRedirectUrl());
+                } else {
+                    System.out.println("Command not found.");
+                }
+            } else if (command.startsWith("set ")) {
+                command = command.replaceFirst("set ", "").trim();
+                if (command.startsWith("redirect ")) {
+                    command = command.replaceFirst("redirect ", "").trim();
+                    servlet.setRedirectUrl(command);
                 } else {
                     System.out.println("Command not found.");
                 }

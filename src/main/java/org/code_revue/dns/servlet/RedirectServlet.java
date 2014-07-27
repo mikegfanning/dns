@@ -17,8 +17,9 @@ public class RedirectServlet extends HttpServlet {
 
     private final Logger logger = LoggerFactory.getLogger(RedirectServlet.class);
 
-    private final String redirectUrl;
     private final String servletName;
+
+    private String redirectUrl;
 
     /**
      * Creates a new servlet that redirects all requests to supplied URL.
@@ -39,6 +40,22 @@ public class RedirectServlet extends HttpServlet {
     protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         logger.debug("Redirecting request {} from {} to {}", req.getRequestURI(), req.getRemoteAddr(), redirectUrl);
         res.sendRedirect(redirectUrl);
+    }
+
+    /**
+     * Get the redirect URL returned by this servlet.
+     * @return Redirect URL
+     */
+    public String getRedirectUrl() {
+        return redirectUrl;
+    }
+
+    /**
+     * Sets the redirect URL returned by this servlet.
+     * @param redirectUrl
+     */
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
     }
 
 }
