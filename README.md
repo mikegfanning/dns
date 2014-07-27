@@ -4,6 +4,8 @@
 
 This is a simple DNS server written in Java and built to play pranks on my brother. Basically I'm planning to stick it on a Raspberry Pi, point the DHCP on my home network at it and make every web site redirect to some obnoxious YTMND page.
 
+In a hilarious reversal of fortune, my wireless router doesn't allow me to configure the DNS server provided via DHCP - it always lists itself as the DNS server and relays to an external server. Time to start working on a DHCP implementation I guess...
+
 ## Requirements
 
 * Java SDK 1.7 or above
