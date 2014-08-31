@@ -19,16 +19,17 @@ import java.util.Scanner;
  *
  * @author Mike Fanning
  */
-public class DnsApp {
+public class TestDnsApp {
 
     public static void main(String... args) throws IOException, LifecycleException {
 
         RedirectServlet servlet = new RedirectServlet("http://hippohippo.ytmnd.com/", "lel");
         final TomcatServer httpServer = new TomcatServer();
+        httpServer.setPort(1080);
         httpServer.setServlet(servlet);
 
         DatagramConnector connector = new DatagramConnector();
-        connector.setPort(53);
+        connector.setPort(1053);
 
         LocalhostResolver resolver = new LocalhostResolver();
         resolver.addException("ytmnd.com");
