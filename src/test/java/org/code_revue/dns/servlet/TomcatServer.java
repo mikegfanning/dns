@@ -41,13 +41,14 @@ public class TomcatServer {
         server.setBaseDir(workDir);
 
         logger.debug("Adding context");
-        Context context = server.addContext("/", workDir + File.separator + "webapp");
+        Context context = server.addContext("/", workDir);
 
         logger.debug("Adding servlet {}", servlet.getServletName());
         Tomcat.addServlet(context, servlet.getServletName(), servlet);
         context.addServletMapping("/", servlet.getServletName());
 
         server.start();
+
         running = true;
     }
 
