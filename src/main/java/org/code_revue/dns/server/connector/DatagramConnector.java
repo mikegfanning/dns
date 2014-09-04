@@ -84,7 +84,7 @@ public class DatagramConnector implements DnsConnector {
         }
 
         try {
-            ByteBuffer message = ByteBuffer.allocateDirect(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
+            ByteBuffer message = ByteBuffer.allocate(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
             SocketAddress address = channel.receive(message);
             logger.debug("Message received from {}", address);
             receiveCount.incrementAndGet();

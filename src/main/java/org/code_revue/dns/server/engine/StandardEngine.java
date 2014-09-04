@@ -152,7 +152,7 @@ public class StandardEngine implements DnsEngine {
                 logger.debug("Sending DNS query to relay server");
                 channel.write(payload.getMessageData());
 
-                ByteBuffer response = ByteBuffer.allocateDirect(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
+                ByteBuffer response = ByteBuffer.allocate(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
                 channel.receive(response);
                 logger.debug("Response received from relay server");
 

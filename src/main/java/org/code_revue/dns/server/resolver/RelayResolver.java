@@ -94,7 +94,7 @@ public class RelayResolver implements DnsResolver {
             logger.debug("Sending DNS query to relay server");
             channel.write(buffer);
 
-            ByteBuffer response = ByteBuffer.allocateDirect(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
+            ByteBuffer response = ByteBuffer.allocate(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
             channel.receive(response);
             logger.debug("Response received from relay server");
 

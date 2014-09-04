@@ -50,7 +50,7 @@ public class DnsQueryBuilder {
      * Creates a new DnsQueryBuilder, initializing the id field to a random value.
      */
     public DnsQueryBuilder() {
-        messageData = ByteBuffer.allocateDirect(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
+        messageData = ByteBuffer.allocate(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
         overlay = new DnsMessageOverlay(messageData);
         overlay.setIdentifier((short) random.nextInt());
     }

@@ -76,7 +76,7 @@ public class RelayEngine implements DnsEngine {
             channel.write(payload.getMessageData());
             logger.debug("DNS query forwarded to relay server");
 
-            ByteBuffer response = ByteBuffer.allocateDirect(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
+            ByteBuffer response = ByteBuffer.allocate(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
             channel.receive(response);
             logger.debug("DNS response received");
 

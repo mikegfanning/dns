@@ -24,7 +24,7 @@ public class TestDnsMessages {
 
     @Test
     public void testDnsMessageOverlayHeader() {
-        ByteBuffer buffer = ByteBuffer.allocateDirect(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
+        ByteBuffer buffer = ByteBuffer.allocate(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
         DnsMessageOverlay overlay = new DnsMessageOverlay(buffer);
 
         short id = (short) 0xaaaa;
@@ -109,7 +109,7 @@ public class TestDnsMessages {
                 .setOperationCode(DnsOpCode.QUERY)
                 .addQuestion(new DnsQuestion(domainName, DnsRecordType.A, DnsRecordClass.IN));
 
-        ByteBuffer buffer = ByteBuffer.allocateDirect(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
+        ByteBuffer buffer = ByteBuffer.allocate(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
 
         try (DatagramChannel channel = DatagramChannel.open()) {
             System.out.println("Querying OpenDNS for " + domainName + " A record(s)");
@@ -176,7 +176,7 @@ public class TestDnsMessages {
                         channel.write(query);
                         sendCount.incrementAndGet();
 
-                        ByteBuffer responseBuffer = ByteBuffer.allocateDirect(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
+                        ByteBuffer responseBuffer = ByteBuffer.allocate(DnsMessageOverlay.MAX_UDP_DNS_LENGTH);
                         channel.receive(responseBuffer);
                         receiveCount.incrementAndGet();
 
