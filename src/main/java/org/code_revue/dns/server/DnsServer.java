@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousCloseException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -102,6 +103,17 @@ public class DnsServer {
         if (!worker.isAlive() && !worker.isShutdown() && running) {
             logger.debug("Server is already running, starting connector thread");
             worker.start();
+        }
+    }
+
+    /**
+     * Method for adding a list of connectors to the server. This also makes the component more Spring dependency
+     * injection friendly.
+     * @param connectors Connectors to add to server
+     */
+    public void setConnectors(List<DnsConnector> connectors) {
+        for (DnsConnector connector: connectors) {
+            addConnector(connector);
         }
     }
 
