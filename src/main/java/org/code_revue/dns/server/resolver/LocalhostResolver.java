@@ -103,6 +103,15 @@ public class LocalhostResolver implements DnsResolver {
     }
 
     /**
+     * Sets exception list, overwriting any previous exceptions. Spring DI friendly method.
+     * @param exceptions Domains that this resolver should <b>not</b> attempt to resolve
+     */
+    public void setExceptionList(List<String> exceptions) {
+        logger.debug("Clobbering exception list with {}", exceptions);
+        exceptionList = exceptions;
+    }
+
+    /**
      * Add an exception to the list of domains that will not be resolved to local address.
      * @param exception Domain name
      */
