@@ -76,9 +76,14 @@ public class ResolverChain {
         return resolverRules;
     }
 
+    /**
+     * Replaces the resolver rules in this chain. The parameter is copied into an internal list, so changes to it will
+     * not affect the {@link org.code_revue.dns.server.engine.ResolverChain}.
+     * @param rules
+     */
     public void setResolverRules(List<ResolverRule> rules) {
         List<ResolverRule> newList = new CopyOnWriteArrayList<>();
-        Collections.copy(newList, rules);
+        newList.addAll(rules);
         resolverRules = newList;
     }
 
