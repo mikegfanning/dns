@@ -76,4 +76,10 @@ public class ResolverChain {
         return resolverRules;
     }
 
+    public void setResolverRules(List<ResolverRule> rules) {
+        List<ResolverRule> newList = new CopyOnWriteArrayList<>();
+        Collections.copy(newList, rules);
+        resolverRules = newList;
+    }
+
 }

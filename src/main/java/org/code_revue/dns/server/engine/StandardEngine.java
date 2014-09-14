@@ -13,7 +13,9 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -63,6 +65,32 @@ public class StandardEngine implements DnsEngine {
      */
     public StandardEngine(byte[] dnsServerIp, int port) {
         this.dnsServerIp = dnsServerIp;
+        this.port = port;
+    }
+
+    /**
+     * Creates a new engine with the provided server IP for relaying queries that cannot be authoritatively answered.
+     * @param dnsServerIp Server address
+     */
+    public StandardEngine(String dnsServerIp) {
+        this(dnsServerIp, DEFAULT_DNS_PORT);
+    }
+
+    /**
+     * Creates a new engine with the provided server IP and port for relaying queries that cannot be authoritatively
+     * answered.
+     * @param dnsServerIp Server address
+     * @param port Server port
+     */
+    public StandardEngine(String dnsServerIp, int port) {
+        StringTokenizer tokenizer = new StringTokenizer(dnsServerIp, ".");
+        this.dnsServerIp = new byte[tokenizer.countTokens()];
+        int index = 0;
+        while (tokenizer.hasMoreTokens()) {
+            String token = tokenizer.nextToken();
+            this.dnsServerIp[index] = (byte) (Integer.parseInt(token) & 0xff);
+            index++;
+        }
         this.port = port;
     }
 
@@ -206,6 +234,23 @@ public class StandardEngine implements DnsEngine {
      */
     public void setResolverChain(ResolverChain resolverChain) {
         this.resolverChain = resolverChain;
+    }
+
+    /**
+     * Returns the IP address of the relay DNS server. The returned byte array can be modified without affecting the
+     * engine.
+     * @return Relay DNS server IP address
+     */
+    public byte[] getDnsServerIp() {
+        return Arrays.copyOf(dnsServerIp, dnsServerIp.length);
+    }
+
+    /**
+     * Returns the relay DNS server's port.
+     * @return Port used for DNS relaying
+     */
+    public int getPort() {
+        return port;
     }
 
     /**
