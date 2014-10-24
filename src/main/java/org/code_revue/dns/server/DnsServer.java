@@ -2,16 +2,13 @@ package org.code_revue.dns.server;
 
 import org.code_revue.dns.message.DnsResponseBuilder;
 import org.code_revue.dns.message.DnsResponseCode;
-import org.code_revue.dns.server.connector.DatagramConnector;
 import org.code_revue.dns.server.connector.DnsConnector;
 import org.code_revue.dns.server.engine.DnsEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.channels.AsynchronousCloseException;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -41,7 +38,7 @@ public class DnsServer {
 
     private ConcurrentMap<DnsConnector, ConnectorWorker> connectorWorkers = new ConcurrentHashMap<>();
     private DnsEngine engine;
-    private ExecutorService executor;
+    private Executor executor;
     private AtomicLong connectorIndex = new AtomicLong(0);
 
     /**
@@ -152,7 +149,6 @@ public class DnsServer {
             }
 
             logger.debug("Stopping ExecutorService");
-            executor.shutdown();
         }
     }
 
@@ -180,7 +176,7 @@ public class DnsServer {
 
                                 logger.debug("DNS query received from {}", payload.getRemoteAddress());
 
-                                executor.submit(new Runnable() {
+                                executor.execute(new Runnable() {
                                     @Override
                                     public void run() {
                                         DnsPayload response = engine.processDnsPayload(payload);
@@ -248,7 +244,7 @@ public class DnsServer {
      * Get the {@link java.util.concurrent.ExecutorService} response for processing requests concurrently.
      * @return
      */
-    public ExecutorService getExecutor() {
+    public Executor getExecutor() {
         return executor;
     }
 
@@ -256,7 +252,7 @@ public class DnsServer {
      * Set the {@link java.util.concurrent.ExecutorService} used to process requests concurrently.
      * @param executor
      */
-    public void setExecutor(ExecutorService executor) {
+    public void setExecutor(Executor executor) {
         assert null != executor;
         this.executor = executor;
     }
