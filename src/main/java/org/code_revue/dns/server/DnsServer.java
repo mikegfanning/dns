@@ -43,7 +43,7 @@ public class DnsServer {
 
     /**
      * Starts the server. After this method is invoked, all connectors begin reading messages and passing them to the
-     * engine for processing. If an {@link java.util.concurrent.ExecutorService} has not been set, a
+     * engine for processing. If an {@link java.util.concurrent.Executor} has not been set, a
      * {@link java.util.concurrent.ThreadPoolExecutor} will be created by default.
      * @throws java.lang.IllegalStateException If the server is already running
      */
@@ -56,7 +56,7 @@ public class DnsServer {
         }
 
         if (null == executor) {
-            logger.debug("No ExecutorService found, creating ThreadPoolExecutor");
+            logger.debug("No Executor found, creating ThreadPoolExecutor");
             ThreadPoolExecutor tpExec = new ThreadPoolExecutor(5, 10, 60, TimeUnit.SECONDS,
                     new ArrayBlockingQueue<Runnable>(40));
             logger.debug("Prestarting all cores in ThreadPoolExecutor");
@@ -130,8 +130,7 @@ public class DnsServer {
     }
 
     /**
-     * Stops the server and interrupts all connector threads. Also shuts down the underlying
-     * {@link java.util.concurrent.ExecutorService}.
+     * Stops the server and interrupts all connector threads.
      */
     public void stop() {
 
@@ -148,7 +147,7 @@ public class DnsServer {
                 worker.shutdown();
             }
 
-            logger.debug("Stopping ExecutorService");
+            logger.debug("Stopping Executor");
         }
     }
 
@@ -192,7 +191,7 @@ public class DnsServer {
                                 });
                             }
                         } catch (RejectedExecutionException e) {
-                            logger.error("ExecutorService cannot accept any more tasks", e);
+                            logger.error("Executor cannot accept any more tasks", e);
                             connector.write(returnServerFailure(payload));
                         } catch (Exception e) {
                             logger.error("Error resolving response", e);
@@ -241,7 +240,7 @@ public class DnsServer {
     }
 
     /**
-     * Get the {@link java.util.concurrent.ExecutorService} response for processing requests concurrently.
+     * Get the {@link java.util.concurrent.Executor} response for processing requests concurrently.
      * @return
      */
     public Executor getExecutor() {
