@@ -103,6 +103,14 @@ public class LocalhostResolver implements DnsResolver {
     }
 
     /**
+     * Get the list of domains that are excepted from this resolver.
+     * @return
+     */
+    public List<String> getExceptionList() {
+        return exceptionList;
+    }
+
+    /**
      * Sets exception list, overwriting any previous exceptions. Spring DI friendly method.
      * @param exceptions Domains that this resolver should <b>not</b> attempt to resolve
      */
