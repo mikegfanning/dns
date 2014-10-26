@@ -87,4 +87,22 @@ public class ResolverChain {
         resolverRules = newList;
     }
 
+    /**
+     * Moves a rule up or down the list.
+     * @param index Index of element to move
+     * @param up If true, moves the rule towards the beginning of the list, otherwise moves it towards the end
+     */
+    public void moveRule(int index, boolean up) {
+        ResolverRule rule = resolverRules.remove(index);
+        if (null != rule) {
+            int newIndex = up ? index - 1 : index + 1;
+            newIndex = newIndex < 0 ? 0 : newIndex;
+            try {
+                resolverRules.add(newIndex, rule);
+            } catch (IndexOutOfBoundsException e) {
+                resolverRules.add(rule);
+            }
+        }
+    }
+
 }
