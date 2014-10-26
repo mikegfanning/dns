@@ -7,6 +7,8 @@ import org.code_revue.dns.server.resolver.DnsResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -48,6 +50,19 @@ public class QuestionNameResolverRule implements ResolverRule {
         domain = scrubDomain(domain);
         logger.debug("Adding {} to whitelist set", domain);
         return whiteList.add(domain);
+    }
+
+    /**
+     * Get list of domains in the white list. Note that these may not be formatted exactly the same way they were
+     * originally added, but they will be equivalent.
+     * @return List of domains
+     */
+    public List<String> getDomainIterator() {
+        List<String> answer = new ArrayList<>(whiteList.size());
+        for (String domain: whiteList) {
+            answer.add(unScrubDomain(domain));
+        }
+        return answer;
     }
 
     /**
@@ -97,5 +112,10 @@ public class QuestionNameResolverRule implements ResolverRule {
 
     private String scrubDomain(String domain) {
         return (new StringBuilder(domain)).reverse().append('.').toString().toLowerCase();
+    }
+
+    private String unScrubDomain(String domain) {
+        StringBuilder builder = new StringBuilder(domain);
+        return builder.reverse().substring(1, builder.length());
     }
 }
