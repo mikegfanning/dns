@@ -29,16 +29,25 @@ public class SingleHostResolver implements DnsResolver {
     private final Logger logger = LoggerFactory.getLogger(SingleHostResolver.class);
 
     private List<String> exceptionList = new ArrayList<>();
-    private final byte[] hostIp;
+    private byte[] hostIp;
     private int ttl = 120;
     private byte[] text;
 
     /**
-     * Creates a new resolver and fetches the local server IP address.
+     * Creates a new resolver using the local address to answer all A record questions, excluding the exception list.
      * @throws UnknownHostException If the local address cannot be retrieved
      */
     public SingleHostResolver() throws UnknownHostException {
-        hostIp = InetAddress.getLocalHost().getAddress();
+        this(InetAddress.getLocalHost().getAddress());
+    }
+
+    /**
+     * Creates a new resolver using the supplied IP address to answer all A record questions, excluding the exception
+     * list.
+     * @param hostIp IP address that will be used to answer all A record questions
+     */
+    public SingleHostResolver(byte[] hostIp) {
+        this.hostIp = hostIp;
         String textString = "type=lol";
         text = new byte[textString.length() + 1];
         text[0] = (byte) textString.length();
@@ -100,6 +109,22 @@ public class SingleHostResolver implements DnsResolver {
         logger.debug("Resolved answers {}", answers);
         return answers;
 
+    }
+
+    /**
+     * Get the IP address that will be used to answer all A questions.
+     * @return IP address
+     */
+    public byte[] getHostIp() {
+        return hostIp;
+    }
+
+    /**
+     * Set the IP address that will be used to answer all A questions.
+     * @param hostIp IP address that will be used to answer all A record questions
+     */
+    public void setHostIp(byte[] hostIp) {
+        this.hostIp = hostIp;
     }
 
     /**
