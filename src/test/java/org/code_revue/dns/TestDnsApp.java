@@ -4,7 +4,7 @@ import org.apache.catalina.LifecycleException;
 import org.code_revue.dns.server.DnsServer;
 import org.code_revue.dns.server.connector.DatagramConnector;
 import org.code_revue.dns.server.engine.*;
-import org.code_revue.dns.server.resolver.LocalhostResolver;
+import org.code_revue.dns.server.resolver.SingleHostResolver;
 import org.code_revue.dns.servlet.RedirectServlet;
 import org.code_revue.dns.servlet.TomcatServer;
 import org.code_revue.dns.util.ThreadUtils;
@@ -31,7 +31,7 @@ public class TestDnsApp {
         DatagramConnector connector = new DatagramConnector();
         connector.setPort(1053);
 
-        LocalhostResolver resolver = new LocalhostResolver();
+        SingleHostResolver resolver = new SingleHostResolver();
         resolver.addException("ytmnd.com");
 
         ResolverRule rule1 = new AddressRegexResolverRule(".*192\\.168.*", resolver);

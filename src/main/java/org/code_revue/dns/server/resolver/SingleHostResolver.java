@@ -24,12 +24,12 @@ import java.util.List;
  *
  * @author Mike Fanning
  */
-public class LocalhostResolver implements DnsResolver {
+public class SingleHostResolver implements DnsResolver {
 
-    private final Logger logger = LoggerFactory.getLogger(LocalhostResolver.class);
+    private final Logger logger = LoggerFactory.getLogger(SingleHostResolver.class);
 
     private List<String> exceptionList = new ArrayList<>();
-    private final byte[] serverIp;
+    private final byte[] hostIp;
     private int ttl = 120;
     private byte[] text;
 
@@ -37,8 +37,8 @@ public class LocalhostResolver implements DnsResolver {
      * Creates a new resolver and fetches the local server IP address.
      * @throws UnknownHostException If the local address cannot be retrieved
      */
-    public LocalhostResolver() throws UnknownHostException {
-        serverIp = InetAddress.getLocalHost().getAddress();
+    public SingleHostResolver() throws UnknownHostException {
+        hostIp = InetAddress.getLocalHost().getAddress();
         String textString = "type=lol";
         text = new byte[textString.length() + 1];
         text[0] = (byte) textString.length();
@@ -73,7 +73,7 @@ public class LocalhostResolver implements DnsResolver {
         byte[] resourceData;
         switch (question.getQuestionType()) {
             case A:
-                answers.add(new DnsRecord(questionName, DnsRecordType.A, DnsRecordClass.IN, ttl, serverIp));
+                answers.add(new DnsRecord(questionName, DnsRecordType.A, DnsRecordClass.IN, ttl, hostIp));
                 break;
             case CNAME:
                 resourceData = ByteBufferUtils.encodeDomainName("a." + questionName);
@@ -146,7 +146,7 @@ public class LocalhostResolver implements DnsResolver {
     }
 
     /**
-     * Set the time-to-live vlaue that is used for all resolved questions.
+     * Set the time-to-live value that is used for all resolved questions.
      * @param ttl
      */
     public void setTtl(int ttl) {
